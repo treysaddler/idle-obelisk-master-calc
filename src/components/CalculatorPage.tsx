@@ -32,9 +32,33 @@ function withDefaults(def: CalculatorDef, base: Values): Values {
   return v;
 }
 
-function statFor(f: Field): number | undefined {
-  const raw = f.statArray ? statArrayItem(f.statArray[0], f.statArray[1]) : f.stat ? statNumber(f.stat) : undefined;
-  return raw === undefined ? undefined : raw * (f.statScale ?? 1);
+function statFor(f: Field, v: Values): number | undefined {
+  const key = typeof f.stat === 'function' ? f.stat(v) : f.stat;
+  const raw = f.statArray ? statArrayItem(f.statArray[0], f.statArray[1]) : key ? statNumber(key) : undefined;
+  return raw === undefined || Number.isNaN(raw) ? undefined : raw * (f.statScale ?? 1);
+}
+
+/**
+ * Copy every mapped EXPORTSTATS value into the calculator's inputs. Runs twice so sections that
+ * only appear once a filled value unlocks them (e.g. World 2+ contract upgrades) get filled too.
+ */
+export function fillValues(def: CalculatorDef, values: Values) {
+  let next = { ...values };
+  const filledIds = new Set<string>();
+  for (let pass = 0; pass < 2; pass++) {
+    for (const s of resolveSections(def, next)) {
+      for (const f of s.fields) {
+        if (!f.stat && !f.statArray) continue;
+        const x = statFor(f, next);
+        if (x === undefined) continue;
+        next[f.id] = f.kind === 'bool' ? x !== 0 : f.kind === 'select' ? String(x) : x;
+        if (f.statAlso) next[f.statAlso] = next[f.id];
+        filledIds.add(f.id);
+      }
+    }
+    next = withDefaults(def, next);
+  }
+  return { next, filled: filledIds.size };
 }
 
 function numberText(f: NumberField, value: number) {
@@ -185,22 +209,23 @@ export function CalculatorPage({ def }: { def: CalculatorDef }) {
   };
 
   const statFields = sections.flatMap((s) => s.fields).filter((f) => f.stat || f.statArray);
-  const fillFromStats = () => {
-    let filled = 0;
-    const next = { ...values };
-    for (const f of statFields) {
-      const x = statFor(f);
-      if (x === undefined) continue;
-      next[f.id] = f.kind === 'bool' ? x !== 0 : x;
-      if (f.statAlso) next[f.statAlso] = next[f.id];
-      filled++;
-    }
-    const merged = withDefaults(def, next);
-    setValues(merged);
-    save(storeKey, merged);
+  const filledKey = `filled:${def.id}`;
+  const fillFromStats = (auto = false) => {
+    const { next, filled } = fillValues(def, values);
+    setValues(next);
+    save(storeKey, next);
+    if (stats) save(filledKey, stats.updatedAt);
     setResetKey((k) => k + 1);
-    setToast(filled ? `Filled ${filled} field${filled === 1 ? '' : 's'} from EXPORTSTATS` : 'None of these fields were in your EXPORTSTATS');
+    if (auto && !filled) return;
+    setToast(filled ? `Filled ${filled} field${filled === 1 ? '' : 's'} from your EXPORTSTATS` : 'None of these fields were in your EXPORTSTATS');
   };
+
+  // Fill automatically the first time a calculator is opened after a new export is saved.
+  useEffect(() => {
+    if (!stats || !statFields.length) return;
+    if (load<number>(filledKey, 0) >= stats.updatedAt) return;
+    fillFromStats(true);
+  }, [def.id, stats?.updatedAt]);
 
   const reset = () => {
     remove(storeKey);
@@ -231,7 +256,7 @@ export function CalculatorPage({ def }: { def: CalculatorDef }) {
           <div class="toolbar">
             {statFields.length > 0 && (
               stats
-                ? <button class="btn" onClick={fillFromStats}>Fill from EXPORTSTATS</button>
+                ? <button class="btn" onClick={() => fillFromStats()}>Fill from EXPORTSTATS</button>
                 : <a class="btn ghost" href="#/stats">Add EXPORTSTATS to auto-fill</a>
             )}
             <button class="btn ghost" onClick={reset}>Reset</button>

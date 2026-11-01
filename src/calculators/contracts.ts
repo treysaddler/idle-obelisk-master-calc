@@ -60,11 +60,11 @@ function sections(v: Values): Section[] {
     {
       title: 'Contract points',
       fields: [
-        { kind: 'number', id: 'base', label: 'Points per contract', default: 19, min: 0, step: 1 },
-        { kind: 'number', id: 'x2', label: '2x chance', default: 0, min: 0, max: 100, step: 0.01, suffix: '%' },
-        { kind: 'number', id: 'x3', label: '3x chance', default: 0, min: 0, max: 100, step: 0.01, suffix: '%' },
-        { kind: 'number', id: 'x5', label: '5x chance', default: 0, min: 0, max: 100, step: 0.01, suffix: '%' },
-        { kind: 'number', id: 'x10', label: '10x chance', default: 0, min: 0, max: 100, step: 0.01, suffix: '%' },
+        { kind: 'number', id: 'base', label: 'Points per contract', default: 19, min: 0, step: 1, stat: 'contract_points_rewarded' },
+        { kind: 'number', id: 'x2', label: '2x chance', default: 0, min: 0, max: 100, step: 0.01, suffix: '%', stat: 'contract_double_points_chance' },
+        { kind: 'number', id: 'x3', label: '3x chance', default: 0, min: 0, max: 100, step: 0.01, suffix: '%', stat: 'contract_triple_points_chance' },
+        { kind: 'number', id: 'x5', label: '5x chance', default: 0, min: 0, max: 100, step: 0.01, suffix: '%', stat: 'contract_5x_points_chance' },
+        { kind: 'number', id: 'x10', label: '10x chance', default: 0, min: 0, max: 100, step: 0.01, suffix: '%', stat: 'contract_10x_points_chance' },
       ],
     },
     {
@@ -77,21 +77,21 @@ function sections(v: Values): Section[] {
     {
       title: 'Upgrade setup',
       fields: [
-        { kind: 'number', id: 'cap', label: 'Contract cap upgrade', default: 0, min: 0, step: 1 },
-        { kind: 'number', id: 'costMulti', label: 'Contract upgrade cost multiplier', default: 1, min: 0, max: 1, step: 0.01, help: 'e.g. 0.13 if upgrades cost 13% of base.' },
+        { kind: 'number', id: 'cap', label: 'Contract cap upgrade', default: 0, min: 0, step: 1, stat: 'contract_cap_increase' },
+        { kind: 'number', id: 'costMulti', label: 'Contract upgrade cost multiplier', default: 1, min: 0, max: 1, step: 0.01, help: 'e.g. 0.13 if upgrades cost 13% of base.', stat: 'contract_upgrade_cost_reduction' },
         { kind: 'bool', id: 'w2', label: 'World 2 statue (unlocks W2 upgrades)', default: false },
         { kind: 'bool', id: 'w3', label: 'World 3 statue (unlocks W3 upgrades)', default: false },
         { kind: 'bool', id: 'w4', label: 'World 4 statue (unlocks W4 upgrades)', default: false },
         ...TAGS.map(([t, label]): Field => ({ kind: 'bool', id: 'max' + t, label: `Max every ${label} upgrade`, default: false })),
       ],
     },
-    ...worlds.map((w): Section => ({
+    ...[1, 2, 3, 4].map((w): Section => ({
       title: `World ${w} upgrades`,
-      note: 'Current level, then the level you want.',
+      note: worlds.includes(w) ? 'Current level, then the level you want.' : `Not counted until you tick the World ${w} statue above.`,
       collapsed: true,
       fields: UPGRADES.flatMap((u, i): Field[] =>
         u.world !== w ? [] : [
-          { kind: 'number', id: `u${i}c`, label: `${u.name} — current`, default: 0, min: 0, max: u.capOffset + cap, step: 1 },
+          { kind: 'number', id: `u${i}c`, label: `${u.name} — current`, default: 0, min: 0, max: u.capOffset + cap, step: 1, statArray: ['contracts_array', i + 1] },
           { kind: 'number', id: `u${i}d`, label: `${u.name} — want`, default: 0, min: 0, max: u.capOffset + cap, step: 1 },
         ]),
     })),

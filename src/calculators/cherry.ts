@@ -69,9 +69,9 @@ export const cherryCalc: CalculatorDef = {
     {
       title: 'Your bombs',
       fields: [
-        { kind: 'number', id: 'free', label: 'Free bomb chance', default: 20, min: 0, max: 50, step: 1, suffix: '%' },
+        { kind: 'number', id: 'free', label: 'Free bomb chance', default: 20, min: 0, max: 50, step: 1, suffix: '%', stat: 'bomb_free_chance' },
         { kind: 'number', id: 'd20', label: 'D20 charges', default: 58, min: 20, max: 100, step: 1 },
-        { kind: 'number', id: 'triple', label: 'Triple cherry chance', default: 14, min: 0, max: 50, step: 0.5, suffix: '%' },
+        { kind: 'number', id: 'triple', label: 'Triple cherry chance', default: 14, min: 0, max: 50, step: 0.5, suffix: '%', stat: 'bomb_cherry3x_chance' },
         { kind: 'bool', id: 'founder', label: 'Have founder bomb', default: true },
       ],
     },

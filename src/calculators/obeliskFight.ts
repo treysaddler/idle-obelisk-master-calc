@@ -137,7 +137,7 @@ export const obeliskFightCalc: CalculatorDef = {
         collapsed: true,
         fields: [
           { kind: 'number', id: 'contracts', label: 'Completed contracts', default: 0, min: 0, step: 1 },
-          { kind: 'number', id: 'contractCap', label: 'Contract cap upgrades', default: 0, min: 0, step: 1 },
+          { kind: 'number', id: 'contractCap', label: 'Contract cap upgrades', default: 0, min: 0, step: 1, stat: 'contract_cap_increase' },
           ...CONTRACT_UPGRADES.flatMap(([id, label, idx, off]): Field[] => [
             { kind: 'number', id: id + 'Cur', label: `${label} — current`, default: 0, min: 0, step: 1, statArray: ['contracts_array', idx], statAlso: id + 'If' },
             { kind: 'number', id: id + 'If', label: `${label} — what if`, default: 0, min: 0, max: cap + off, step: 1 },

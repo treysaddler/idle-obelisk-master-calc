@@ -20,6 +20,9 @@ export const DRONE_SUITS: { name: string; baseExp: number; baseFuel: number }[] 
   { name: 'Minotaur', baseExp: 765000, baseFuel: 65 },
 ];
 
+// EXPORTSTATS prefixes for each suit's fuel grade, in DRONE_SUITS order.
+const SUIT_KEYS = ['bear', 'chain', 'midas', 'frogger', 'veinseeker', 'starburst', 'elixir', 'void', 'angler', 'prism', 'minotaur'];
+
 export function droneGrade(i: {
   suit: number; current: number; desired: number; gameSpeed: number;
   expMulti: number; fuelMulti: number; fuelSave: number; useFuelSave: boolean;
@@ -46,7 +49,7 @@ const droneGradeCalc: CalculatorDef = {
       title: 'Drone',
       fields: [
         { kind: 'select', id: 'suit', label: 'Drone suit', default: '0', options: DRONE_SUITS.map((s, i) => ({ value: String(i), label: s.name })) },
-        { kind: 'number', id: 'current', label: 'Current grade', default: 0, min: 0, step: 1 },
+        { kind: 'number', id: 'current', label: 'Current grade', default: 0, min: 0, step: 1, stat: (v) => `${SUIT_KEYS[Number(v.suit)] ?? ''}_fuel_grade` },
         { kind: 'number', id: 'desired', label: 'Desired grade', default: 1, min: 1, step: 1 },
       ],
     },
@@ -157,8 +160,8 @@ const lootbugCalc: CalculatorDef = {
         { kind: 'number', id: 'lootMulti', label: 'Lootbug loot multi', default: 1, min: 1, step: 0.1, stat: 'lootbug_loot_multi' },
         { kind: 'number', id: 'jackpot', label: 'Jackpot chance', default: 0, min: 0, max: 100, step: 1, suffix: '%', stat: 'freebie_5x_chance' },
         { kind: 'number', id: 'refresh', label: 'Instant refresh chance', default: 0, min: 0, max: 99, step: 1, suffix: '%', stat: 'freebie_refresh_chance' },
-        { kind: 'bool', id: 'stonks', label: 'Stonks unlocked', default: false },
-        { kind: 'number', id: 'stonksMulti', label: 'Stonks multi', default: 1, min: 1, max: 3, step: 0.1 },
+        { kind: 'bool', id: 'stonks', label: 'Stonks unlocked', default: false, stat: 'stonks_chance' },
+        { kind: 'number', id: 'stonksMulti', label: 'Stonks multi', default: 1, min: 1, max: 3, step: 0.1, stat: 'stonks_multi' },
       ],
     },
   ],

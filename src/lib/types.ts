@@ -6,8 +6,8 @@ interface FieldBase {
   id: string;
   label: string;
   help?: string;
-  /** EXPORTSTATS key used by "Fill from EXPORTSTATS". */
-  stat?: string;
+  /** EXPORTSTATS key used by "Fill from EXPORTSTATS"; can depend on other inputs. */
+  stat?: string | ((v: Values) => string | undefined);
   /** Read from an exported array instead: [key, 1-based index]. */
   statArray?: [string, number];
   /** Multiply an exported value into this field's unit (e.g. 100 for 0.25 -> 25%). */
