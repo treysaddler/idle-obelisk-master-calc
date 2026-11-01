@@ -1,4 +1,4 @@
-import { formatBig, formatInt, formatNum } from '../lib/format';
+import { formatBig, formatInt, formatNum, formatPct } from '../lib/format';
 import { num, type CalculatorDef } from '../lib/types';
 
 interface RelicType { name: string; effect: number; unit: string; cap: number | null; unlock: number }
@@ -67,24 +67,61 @@ export const relicCalc: CalculatorDef = {
   id: 'relics',
   title: 'Relic Expectations',
   category: 'Odds',
-  summary: 'Expected relics of every type, and their total bonus, from the chests you have opened.',
+  summary: 'Expected relics of every type from your chests, plus divine reroll odds and gem costs.',
   source: { name: 'Relic Calculator', url: 'https://docs.google.com/spreadsheets/d/1nTx41KMGUfMO27MxD14cCNQa71LmF3UGkMvJKodvP6A/' },
-  keywords: ['relic chest', 'divine', 'mythic'],
+  keywords: ['relic chest', 'divine', 'mythic', 'reroll'],
   sections: [
     {
       title: 'Chests opened',
+      note: 'Relic chests is the number at the top left of your relic chest summary.',
       fields: [
         { kind: 'number', id: 'relicChests', label: 'Relic chests', default: 400000, min: 0, big: true },
         { kind: 'number', id: 'mythicChests', label: 'Mythic chests', default: 0, min: 0, step: 1 },
         { kind: 'number', id: 'divineChests', label: 'Divine chests', default: 0, min: 0, step: 1 },
       ],
     },
+    {
+      title: 'Divine rerolls',
+      note: 'Each reroll costs 200 gems and re-rolls every relic chest.',
+      fields: [
+        { kind: 'number', id: 'currentDivines', label: 'Current divines', default: 0, min: 0, step: 1, help: 'Top right of your relic chest summary.' },
+        { kind: 'number', id: 'gems', label: 'Gems you\'re willing to spend', default: 0, min: 0, big: true },
+      ],
+    },
   ],
   compute(v) {
-    const totals = relicTotals(num(v, 'relicChests'), num(v, 'mythicChests'), num(v, 'divineChests'));
+    const relicChests = num(v, 'relicChests');
+    const divineChests = num(v, 'divineChests');
+    const totals = relicTotals(relicChests, num(v, 'mythicChests'), divineChests);
+    const plan = divineRerollPlan({ relicChests, divineChests, current: num(v, 'currentDivines'), gems: num(v, 'gems') });
     return {
-      outputs: totals.map((t) => ({ label: `${t.rarity.name} relics`, value: formatInt(t.pool), tone: t.rarity.name === 'Divine' ? ('primary' as const) : undefined })),
-      tables: totals.map((t) => ({
+      outputs: [
+        { label: 'Reroll advice', value: plan.verdict, tone: 'primary', help: plan.detail },
+        { label: `Chance of ${plan.nextTarget}+ divines`, value: formatPct(plan.nextProb, 1), help: `With ${formatInt(plan.rerolls)} rerolls` },
+        { label: `Gems to expect ${plan.nextTarget}+`, value: formatInt(plan.nextGems), help: 'Average cost' },
+        ...totals.map((t) => ({ label: `${t.rarity.name} relics`, value: formatInt(t.pool) })),
+      ],
+      tables: [
+        {
+          title: 'Divine reroll odds',
+          note: 'Chance per reroll of landing at least that many divines, the average rerolls and gems that takes, and your odds with the gems above.',
+          columns: ['Divines', 'Per roll', 'Avg rolls', 'Avg gems', 'Your odds'],
+          rows: plan.rows.map((r) => [r.target, formatPct(r.perRoll, 2), formatInt(r.avgRolls), formatBig(r.avgGems), formatPct(r.withGems, 1)]),
+          highlight: plan.rows.findIndex((r) => r.target === plan.nextTarget),
+        },
+        ...tablesFor(totals),
+      ],
+      notes: [
+        'Relic counts are averages — real counts vary, especially for divine relics.',
+        "Divine reroll odds are ported from the DivineChest Calc and Rody's Relic DLC tabs of Ultimate Gem Calculator 2.2.",
+        'Relic list matches the original sheet and may miss newer relics. For odds on a specific mix of divine types, use the Relic Solver.',
+      ],
+    };
+  },
+};
+
+function tablesFor(totals: ReturnType<typeof relicTotals>) {
+  return totals.map((t) => ({
         title: t.rarity.name,
         columns: ['Relic', 'Expected', 'Bonus', 'Cap'],
         rows: t.rarity.types.map((type, i) => {
@@ -93,11 +130,84 @@ export const relicCalc: CalculatorDef = {
           const capped = type.cap != null && count >= type.cap;
           return [type.name, formatInt(count) + (capped ? ' (max)' : ''), (type.unit === 'x' ? '+' + formatBig(bonus) + 'x' : '+' + formatNum(bonus, 2) + type.unit), type.cap == null ? '—' : formatInt(type.cap)];
         }),
-      })),
-      notes: [
-        'These are averages — real counts vary, especially for divine relics.',
-        'Relic list matches the original sheet and may miss newer relics. For exact divine odds, use the Relic Solver.',
-      ],
-    };
-  },
-};
+  }));
+}
+
+// ---- Divine rerolls (Ultimate Gem 2.2: DivineChest Calc + Rody's Relic DLC) ----
+
+export const DIVINE_CHANCE = 1 / 25000;
+export const REROLL_GEMS = 200;
+
+/** P(X >= k) for X ~ Binomial(n, p), summed from the upper tail so tiny odds stay accurate. */
+export function binomialAtLeast(k: number, n: number, p: number) {
+  if (k <= 0) return 1;
+  if (k > n) return 0;
+  // Start at the pmf of k using logs, then walk upward.
+  let logPmf = logChoose(n, k) + k * Math.log(p) + (n - k) * Math.log1p(-p);
+  let sum = 0;
+  for (let i = k; i <= n; i++) {
+    const pmf = Math.exp(logPmf);
+    sum += pmf;
+    if (pmf < sum * 1e-17 && i > n * p) break;
+    logPmf += Math.log((n - i) / (i + 1)) + Math.log(p) - Math.log1p(-p);
+  }
+  return Math.min(1, sum);
+}
+
+function logChoose(n: number, k: number) {
+  return logFactorial(n) - logFactorial(k) - logFactorial(n - k);
+}
+
+// Stirling series; exact enough for these counts.
+function logFactorial(n: number): number {
+  if (n < 20) {
+    let r = 0;
+    for (let i = 2; i <= n; i++) r += Math.log(i);
+    return r;
+  }
+  return n * Math.log(n) - n + 0.5 * Math.log(2 * Math.PI * n) + 1 / (12 * n) - 1 / (360 * n ** 3);
+}
+
+export function divineRerollPlan(i: { relicChests: number; divineChests: number; current: number; gems: number }) {
+  const rerolls = Math.floor(i.gems / REROLL_GEMS);
+  // Divine chests are guaranteed; the rest roll at 1 in 25,000 per relic chest.
+  const perRoll = (target: number) => binomialAtLeast(target - i.divineChests, i.relicChests, DIVINE_CHANCE);
+  const withGems = (p: number) => (rerolls > 0 ? 1 - (1 - p) ** rerolls : 0);
+  const nextTarget = i.current + 1;
+  const nextPer = perRoll(nextTarget);
+  const nextProb = withGems(nextPer);
+  const nextGems = nextPer > 0 ? Math.ceil(1 / nextPer) * REROLL_GEMS : Infinity;
+
+  const rows = [];
+  for (let t = Math.max(1, i.divineChests + 1, nextTarget - 3); rows.length < 14; t++) {
+    const p = perRoll(t);
+    if (p < 1e-12 && t > nextTarget) break;
+    rows.push({ target: t, perRoll: p, avgRolls: p > 0 ? Math.ceil(1 / p) : Infinity, avgGems: p > 0 ? Math.ceil(1 / p) * REROLL_GEMS : Infinity, withGems: withGems(p) });
+  }
+
+  // Sheet thresholds: >= 98% go for it, < 63% probably not worth it, in between borderline.
+  const best = (chance: number) => {
+    let t = nextTarget;
+    while (withGems(perRoll(t + 1)) >= chance && t < nextTarget + 200) t++;
+    return withGems(perRoll(t)) >= chance ? t : 0;
+  };
+  let verdict: string;
+  let detail: string;
+  const pct = formatPct(nextProb, 1);
+  if (rerolls === 0) {
+    verdict = 'Add gems to see odds';
+    detail = `One reroll costs ${REROLL_GEMS} gems.`;
+  } else if (nextProb < 0.63) {
+    verdict = 'Probably not worth it';
+    detail = `${pct} chance of ${nextTarget}+ divines with ${formatInt(rerolls)} rerolls. Expect about ${formatInt(nextGems)} gems for that step.`;
+  } else if (nextProb >= 0.98) {
+    const likely = best(0.63);
+    const stretch = best(0.1);
+    detail = `${pct} chance of ${nextTarget}+. Likely high point: ${likely} (${formatPct(withGems(perRoll(likely)), 1)}); stretch: ${stretch} (${formatPct(withGems(perRoll(stretch)), 1)}).`;
+    verdict = 'Go for it';
+  } else {
+    verdict = 'Borderline';
+    detail = `${pct} chance of ${nextTarget}+ divines with ${formatInt(rerolls)} rerolls. It may be worth it, but it isn't a safe bet.`;
+  }
+  return { rerolls, nextTarget, nextProb, nextGems, rows, verdict, detail };
+}

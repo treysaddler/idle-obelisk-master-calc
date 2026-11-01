@@ -9,7 +9,7 @@ import { chanceWithin, DRONES, expectedTime } from './droneCards';
 import { froggerRates } from './frogger';
 import { obeliskFight } from './obeliskFight';
 import { pickaxeDamage } from './pickaxe';
-import { distribute, RARITIES, relicTotals } from './relics';
+import { binomialAtLeast, distribute, DIVINE_CHANCE, divineRerollPlan, RARITIES, relicTotals } from './relics';
 import { pathCost, skillPath } from './skills';
 import { transmuterBreakpoint } from './transmuter';
 import { dronePointsGold, levelExp, prestigePoints } from './wiki';
@@ -104,6 +104,21 @@ describe('relics', () => {
     expect(rare.counts[4]).toBeCloseTo(2500, 6);
     expect(epic.counts[0]).toBeCloseTo(52700, 3);
     expect(mythic.counts[1]).toBeCloseTo(3742, 3);
+  });
+  it('matches DivineChest Calc odds', () => {
+    expect(binomialAtLeast(1, 110000, DIVINE_CHANCE)).toBeCloseTo(0.9877237405, 9);
+    expect(binomialAtLeast(5, 110000, DIVINE_CHANCE)).toBeCloseTo(0.4488177254, 9);
+    const plan = divineRerollPlan({ relicChests: 110000, divineChests: 0, current: 13, gems: 305000 });
+    expect(plan.rerolls).toBe(1525);
+    expect(+(plan.nextProb * 100).toFixed(1)).toBe(26.4);
+    expect(plan.nextGems).toBe(994600);
+    expect(plan.verdict).toBe('Probably not worth it');
+  });
+  it("matches Rody's exact-count odds with guaranteed divine chests", () => {
+    // 370k relics + 18 divine chests: P(exactly 32 divines) = P(14 rolled).
+    const exact = binomialAtLeast(14, 370000, DIVINE_CHANCE) - binomialAtLeast(15, 370000, DIVINE_CHANCE);
+    expect(exact).toBeCloseTo(0.1036824312, 9);
+    expect(binomialAtLeast(38 - 18, 370000, DIVINE_CHANCE) - binomialAtLeast(39 - 18, 370000, DIVINE_CHANCE)).toBeCloseTo(0.03904336374, 9);
   });
   it('respects caps', () => {
     const got = distribute(RARITIES[0].types, 1e7);

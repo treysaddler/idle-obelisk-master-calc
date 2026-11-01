@@ -42,7 +42,7 @@ Expectations, Late World 3 Checklist, and the five wiki calculators (Drone Grade
 Points, Level Exp, Lootbug Speed, Prestige Points).
 
 **Linked, not ported yet** (shown under "Not ported yet" in the app): Total Resources,
-Ore & Bar, Ultimate Gem Calculator, Fishing Gem Spending, Star Gain
+Ore & Bar, Ultimate Gem Calculator (divine odds done; gem engine in progress), Fishing Gem Spending, Star Gain
 Checklist (Ob60), Archaeology Calculator, Damage Ledger. Tools that run on their own
 server or as desktop programs (Relic Solver, Arch Optimizer, Event Simulator) stay as links.
 
@@ -50,9 +50,10 @@ server or as desktop programs (Relic Solver, Arch Optimizer, Event Simulator) st
 
 - **Relic Expectations:** the original Data tab skips some rows in its stage sums
   (`SUM(K3:K7)` leaves out row 8; rare totals leave out column M), which double-counts
-  some relics and loses others. This port gives out every relic exactly once. Divine
-  odds came from an Apps Script that isn't in the export, so that part links to the
-  Relic Solver.
+  some relics and loses others. This port gives out every relic exactly once. The
+  sheet's own divine odds came from an Apps Script that isn't in the export; divine
+  reroll odds come from Ultimate Gem 2.2's DivineChest Calc and Rody's Relic DLC tabs
+  instead, counting divine chests as guaranteed divines.
 - **Skill Points:** the freebie count no longer subtracts your shards twice.
 - **Contracts:** the last two World 4 upgrades used the wrong cost column in the
   sheet; they now use their own.
