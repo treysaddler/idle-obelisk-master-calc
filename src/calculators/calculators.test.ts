@@ -1,5 +1,6 @@
 // Expected values are the cached results from the original sheets/pages.
 import { describe, expect, it } from 'vitest';
+import { baseGameSpeed, FLOOR_ORES, floorRates, FLOORS, perfectRate, portalValue, type FarmStats } from './bestFloor';
 import { cherryVsD20 } from './cherry';
 import { contractPoints, normCdf, upgradeCost } from './contracts';
 import upgrades from '../data/contractUpgrades.json';
@@ -121,6 +122,45 @@ describe('transmuter', () => {
     const r = transmuterBreakpoint({ free: 20, x2: 50, x3: 30, x5: 10, x10: 5, x20: 1, x100: 0, craftCost: 0.5, bop: 3, trans: 2, transBop: 10, bopGold: 0, goldChance: 1, goldMult: 3 });
     expect(r.costTransition).toBeGreaterThan(0);
     expect(r.lowOre).toBeDefined();
+  });
+});
+
+describe('best floor', () => {
+  const base: FarmStats = {
+    oresPerScreen: 10, oreIncome: 1, baseSpeed: 1, fishingNoticeW3: false, w4Quests: 0,
+    goldenFloorChance: 0, goldenFloorMulti: 1, rainbowFloorChance: 0, rainbowFloorMulti: 1,
+    galacticFloorChance: 0, galacticFloorMulti: 1, prismaticFloorChance: 0, prismaticFloorMulti: 1,
+    goldenOreChance: 0, goldenOreMulti: 1, rainbowOreChance: 0, rainbowOreMulti: 1,
+    voidChance: 0, voidBaseMulti: 1, voidMulti: 0, goldenVoidChance: 0, goldenVoidMulti: 1,
+    rainbowVoidChance: 0, rainbowVoidMulti: 1, galacticVoidChance: 0, galacticVoidMulti: 1,
+  };
+  it('lays out floors like the sheet', () => {
+    expect(FLOORS[0]).toMatchObject({ oreA: 1, oreB: 2, shareA: 0.8, world: 1 });
+    expect(FLOORS[48]).toMatchObject({ oreA: 31, oreB: 32, world: 2 });
+    expect(FLOOR_ORES[FLOORS[48].oreA - 1].name).toBe('Sandcasium');
+    expect(FLOORS[70]).toMatchObject({ goldenFloor: 0.5, speed: 0.75 });
+    expect(FLOORS[122]).toMatchObject({ prismatic: -0.15, speed: 0.6 });
+  });
+  it('matches the cached Floors values for Tin', () => {
+    const r = floorRates(base, 1);
+    expect(r[0].base).toBe(23040);
+    expect(r[1].base).toBe(14400);
+    expect(r[2].base).toBe(0);
+    expect(perfectRate(base)).toBe(28800);
+  });
+  it('credits void portals by tier', () => {
+    const s = { ...base, voidChance: 0.1, voidMulti: 3 };
+    expect(portalValue(s)).toBeCloseTo(0.3);
+    // Floor 49 has no Tin, but portals turn rocks into Tin: 0.8/31 + 0.2/32 of portal rocks.
+    const r = floorRates(s, 1)[48];
+    expect(r.base).toBe(0);
+    expect(r.void).toBeCloseTo(10 * 0.3 * (0.8 / 31 + 0.2 / 32) * 2880, 6);
+    // Sheet's cached portal share for floor 49 / Tin.
+    expect(0.8 / 31 + 0.2 / 32).toBeCloseTo(0.03205645161, 10);
+  });
+  it('removes floor speed modifiers from exported speed', () => {
+    expect(baseGameSpeed(3, 71, true, 0)).toBeCloseTo(4); // floor 71 is -25%
+    expect(baseGameSpeed(1.4, 80, false, 0)).toBeCloseTo(2); // W3 without fishing notice is 70%
   });
 });
 

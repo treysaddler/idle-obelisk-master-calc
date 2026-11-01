@@ -1,9 +1,6 @@
-import ores from '../data/ores.json';
 import { formatNum } from '../lib/format';
 import { num, type CalculatorDef } from '../lib/types';
-
-interface Ore { world: number; name: string; cost: number }
-const ORES = ores as Ore[];
+import { FLOOR_ORES as ORES } from './bestFloor';
 
 const clamp = (x: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, x));
 const scale = (chance: number, pass: number, fail: number) => chance * pass + (1 - chance) * fail;

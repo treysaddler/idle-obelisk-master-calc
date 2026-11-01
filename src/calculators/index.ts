@@ -1,5 +1,6 @@
 import type { CalculatorDef } from '../lib/types';
 import { w3ChecklistCalc } from '../components/Checklist';
+import { bestFloorCalc } from './bestFloor';
 import { cherryCalc } from './cherry';
 import { contractCalc } from './contracts';
 import { droneCardsCalc } from './droneCards';
@@ -16,6 +17,7 @@ export const calculators: CalculatorDef[] = [
   skillPointCalc,
   obeliskFightCalc,
   contractCalc,
+  bestFloorCalc,
   transmuterCalc,
   cherryCalc,
   froggerCalc,
