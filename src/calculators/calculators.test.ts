@@ -1,6 +1,7 @@
 // Expected values are the cached results from the original sheets/pages.
 import { describe, expect, it } from 'vitest';
 import { baseGameSpeed, FLOOR_ORES, floorRates, FLOORS, perfectRate, portalValue, type FarmStats } from './bestFloor';
+import { portalWeight, variantMulti, veinFloorRates, VEINS, type VeinStats } from './bestVeins';
 import { cherryVsD20 } from './cherry';
 import { contractPoints, normCdf, upgradeCost } from './contracts';
 import upgrades from '../data/contractUpgrades.json';
@@ -161,6 +162,35 @@ describe('best floor', () => {
   it('removes floor speed modifiers from exported speed', () => {
     expect(baseGameSpeed(3, 71, true, 0)).toBeCloseTo(4); // floor 71 is -25%
     expect(baseGameSpeed(1.4, 80, false, 0)).toBeCloseTo(2); // W3 without fishing notice is 70%
+  });
+});
+
+describe('best floor for veins', () => {
+  const farm = {
+    oresPerScreen: 10, oreIncome: 1, baseSpeed: 1, fishingNoticeW3: false, w4Quests: 0,
+    goldenFloorChance: 0, goldenFloorMulti: 1, rainbowFloorChance: 0, rainbowFloorMulti: 1,
+    galacticFloorChance: 0, galacticFloorMulti: 1, prismaticFloorChance: 0, prismaticFloorMulti: 1,
+    goldenOreChance: 0, goldenOreMulti: 1, rainbowOreChance: 0, rainbowOreMulti: 1,
+    voidChance: 0, voidBaseMulti: 1, voidMulti: 0, goldenVoidChance: 0, goldenVoidMulti: 1,
+    rainbowVoidChance: 0, rainbowVoidMulti: 1, galacticVoidChance: 0, galacticVoidMulti: 1,
+  };
+  const vs: VeinStats = {
+    oresPerScreen: 10, spawnRate: 1, income: 1, goldenChance: 0, goldenMulti: 1, rainbowChance: 0, rainbowMulti: 1,
+    gleamingChance: 0, gleamingMulti: 1, morphChance: 0, morphGoldenChance: 0, doubleSpawn: false,
+  };
+  it('matches the cached sheet values for Stone Vein', () => {
+    const r = veinFloorRates(farm, vs, VEINS[0]);
+    expect(r[0].base).toBeCloseTo(192, 9); // 10 ores, 1/15 rarity... capped at spawn rate / rarity
+    expect(r[8].base).toBe(0); // floor 9 is outside the zone
+    expect(portalWeight(VEINS[0], 39)).toBeCloseTo(0.1282051282, 9);
+    const f39 = FLOORS[38];
+    expect(portalWeight(VEINS[0], f39.oreA) * f39.shareA + portalWeight(VEINS[0], f39.oreB) * (1 - f39.shareA)).toBeCloseTo(0.2066666667, 9);
+  });
+  it('applies variants and void portals', () => {
+    expect(variantMulti({ ...vs, goldenChance: 0.5, goldenMulti: 3, rainbowChance: 0.5, rainbowMulti: 2 })).toBeCloseTo(0.5 + 0.25 * 3 + 0.25 * 6);
+    const withVoid = veinFloorRates({ ...farm, voidChance: 0.5, voidMulti: 2 }, vs, VEINS[0]);
+    // Floor 39: half the rocks become portals worth 2x, of which 0.2067 roll Stone Vein ores.
+    expect(withVoid[38].void).toBeCloseTo((1 / 15) * 2880 * 0.5 * 0.2066666667 * 2, 4);
   });
 });
 

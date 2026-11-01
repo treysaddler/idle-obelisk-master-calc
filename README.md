@@ -37,12 +37,12 @@ and add a test in `calculators.test.ts` using values the original sheet computed
 ## Status
 
 **Ported:** Pickaxe Damage, Skill Points, Obelisk Fight, Contracts & Damage,
-Best Floor to Farm (ores), Transmuter vs BoP, Cherry Gem vs D20, Frogger Gem Rate, Drone Cards & Shards, Relic
+Best Floor to Farm (ores and veins), Transmuter vs BoP, Cherry Gem vs D20, Frogger Gem Rate, Drone Cards & Shards, Relic
 Expectations, Late World 3 Checklist, and the five wiki calculators (Drone Grade, Drone
 Points, Level Exp, Lootbug Speed, Prestige Points).
 
 **Linked, not ported yet** (shown under "Not ported yet" in the app): Total Resources,
-Ore & Bar, Best Floor for Veins, Ultimate Gem Calculator, Fishing Gem Spending, Star Gain
+Ore & Bar, Ultimate Gem Calculator, Fishing Gem Spending, Star Gain
 Checklist (Ob60), Archaeology Calculator, Damage Ledger. Tools that run on their own
 server or as desktop programs (Relic Solver, Arch Optimizer, Event Simulator) stay as links.
 

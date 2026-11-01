@@ -1,6 +1,6 @@
 import floorOres from '../data/floorOres.json';
 import { formatBig, formatPct } from '../lib/format';
-import { bool, num, str, type CalculatorDef, type Field, type Values } from '../lib/types';
+import { bool, num, str, type CalculatorDef, type Field, type Section, type Values } from '../lib/types';
 
 interface FloorOre { world: number; name: string; cost: number; health: number }
 export const FLOOR_ORES = floorOres as FloorOre[];
@@ -81,7 +81,7 @@ export interface FarmStats {
 
 const FLOORS_PER_HOUR = 2880; // one floor per 1.25s at 1x speed
 
-function floorsPerHour(s: FarmStats, f: FloorInfo) {
+export function floorsPerHour(s: Pick<FarmStats, 'baseSpeed' | 'fishingNoticeW3' | 'w4Quests'>, f: FloorInfo) {
   const worldMod = f.world === 3 ? (s.fishingNoticeW3 ? 1 : 0.7) : f.world === 4 ? 1 - w4Penalty(s.w4Quests) : 1;
   return FLOORS_PER_HOUR * s.baseSpeed * f.speed * worldMod;
 }
@@ -146,7 +146,7 @@ export function floorCap(worlds: number, showW4: boolean, ore: number) {
   return Math.min(worldCap, showW4 || ore > 66 ? 132 : 102);
 }
 
-function statsFrom(v: Values): FarmStats {
+export function farmStatsFrom(v: Values): FarmStats {
   const p = (id: string) => num(v, id) / 100;
   const fishingNoticeW3 = bool(v, 'fishingW3');
   const w4Quests = num(v, 'w4Quests');
@@ -174,6 +174,32 @@ const pct = (id: string, label: string, stat: string, help?: string): Field =>
 const mult = (id: string, label: string, stat: string, def = 1): Field =>
   ({ kind: 'number', id, label, default: def, min: 0, step: 0.01, stat, big: true });
 
+export const SPEED_SECTION: Section = {
+  title: 'Speed',
+  note: 'EXPORTSTATS game speed includes your current floor\'s modifiers; set "Exported on floor" to remove them.',
+  fields: [
+    { kind: 'number', id: 'gameSpeed', label: 'Game speed', default: 1, min: 0.01, step: 0.01, stat: 'game_speed_multi' },
+    { kind: 'number', id: 'currentFloor', label: 'Exported on floor', default: 0, min: 0, max: FLOOR_COUNT, step: 1, stat: 'current_floor', help: '0 = speed has no floor modifiers.' },
+    { kind: 'bool', id: 'fishingW3', label: 'Fishing notice: World 3 speed', default: false, statArray: ['fishing_notices_array', 14], help: 'Without it, World 3 runs at 70% speed.' },
+    { kind: 'number', id: 'w4Quests', label: 'World 4 quests done', default: 0, min: 0, max: 30, step: 1, stat: 'world_4_quest_progress' },
+  ],
+};
+
+export const VOID_SECTION: Section = {
+  title: 'Void drone',
+  collapsed: true,
+  note: 'Found under Stats → Drones. Export away from floors 103–106 and 129–132, which cut portal chance.',
+  fields: [
+    { kind: 'bool', id: 'useVoid', label: 'Compare with void drone', default: true },
+    pct('vc', 'Void portal chance', 'void_portal_chance', 'Can exceed 100%; the extra helps on floors that cut portal chance.'),
+    mult('vbm', 'Void portal base multi', 'void_portal_base_multi'),
+    mult('vm', 'Normal void portal multi', 'void_portal_multi'),
+    pct('gvc', 'Golden void portal chance', 'golden_void_portal_chance'), mult('gvm', 'Golden void portal multi', 'golden_void_portal_multi'),
+    pct('rvc', 'Rainbow void portal chance', 'rainbow_void_portal_chance'), mult('rvm', 'Rainbow void portal multi', 'rainbow_void_portal_multi'),
+    pct('galvc', 'Galactic void portal chance', 'galactic_void_portal_chance'), mult('galvm', 'Galactic void portal multi', 'galactic_void_portal_multi'),
+  ],
+};
+
 export const bestFloorCalc: CalculatorDef = {
   id: 'best-floor',
   title: 'Best Floor to Farm',
@@ -195,16 +221,7 @@ export const bestFloorCalc: CalculatorDef = {
           { kind: 'bool', id: 'showW4', label: 'Include World 4 floors for W1–W3 ores', default: false },
         ],
       },
-      {
-        title: 'Speed',
-        note: 'EXPORTSTATS game speed includes your current floor\'s modifiers; set "Exported on floor" to remove them.',
-        fields: [
-          { kind: 'number', id: 'gameSpeed', label: 'Game speed', default: 1, min: 0.01, step: 0.01, stat: 'game_speed_multi' },
-          { kind: 'number', id: 'currentFloor', label: 'Exported on floor', default: 0, min: 0, max: FLOOR_COUNT, step: 1, stat: 'current_floor', help: '0 = speed has no floor modifiers.' },
-          { kind: 'bool', id: 'fishingW3', label: 'Fishing notice: World 3 speed', default: false, statArray: ['fishing_notices_array', 14], help: 'Without it, World 3 runs at 70% speed.' },
-          { kind: 'number', id: 'w4Quests', label: 'World 4 quests done', default: 0, min: 0, max: 30, step: 1, stat: 'world_4_quest_progress' },
-        ],
-      },
+      SPEED_SECTION,
       {
         title: 'Ore & floor stats',
         collapsed: true,
@@ -219,24 +236,11 @@ export const bestFloorCalc: CalculatorDef = {
           pct('pfc', 'Prismatic floor chance', 'prismatic_floor_chance'), mult('pfm', 'Prismatic floor multi', 'prismatic_floor_multi'),
         ],
       },
-      {
-        title: 'Void drone',
-        collapsed: true,
-        note: 'Found under Stats → Drones.',
-        fields: [
-          { kind: 'bool', id: 'useVoid', label: 'Compare with void drone', default: true },
-          pct('vc', 'Void portal chance', 'void_portal_chance', 'Can exceed 100%; the extra helps on floors that cut portal chance.'),
-          mult('vbm', 'Void portal base multi', 'void_portal_base_multi'),
-          mult('vm', 'Normal void portal multi', 'void_portal_multi'),
-          pct('gvc', 'Golden void portal chance', 'golden_void_portal_chance'), mult('gvm', 'Golden void portal multi', 'golden_void_portal_multi'),
-          pct('rvc', 'Rainbow void portal chance', 'rainbow_void_portal_chance'), mult('rvm', 'Rainbow void portal multi', 'rainbow_void_portal_multi'),
-          pct('galvc', 'Galactic void portal chance', 'galactic_void_portal_chance'), mult('galvm', 'Galactic void portal multi', 'galactic_void_portal_multi'),
-        ],
-      },
+      VOID_SECTION,
     ];
   },
   compute(v) {
-    const s = statsFrom(v);
+    const s = farmStatsFrom(v);
     const ore = Number(str(v, 'ore')) || 1;
     const cap = floorCap(num(v, 'worlds'), bool(v, 'showW4'), ore);
     const rates = floorRates(s, ore).filter((r) => r.floor.floor <= cap);
