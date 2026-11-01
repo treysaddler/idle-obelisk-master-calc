@@ -11,6 +11,8 @@ mobile-friendly web app. Each calculator credits and links its original author.
 
 Game icons in `public/icons/` are Idle Obelisk Miner art by Checkbox Team, taken from the
 [Idle Obelisk Miner Wiki](https://shminer.miraheze.org/) and credited in the app footer.
+Interface icons for things with no game sprite (time, chance, floors) are
+[Tabler Icons](https://tabler.io/icons) (MIT License), bundled via Iconify in `src/components/uiIcons.ts`.
 
 ## Develop
 

@@ -5,6 +5,8 @@ export type Values = Record<string, number | boolean | string>;
 interface FieldBase {
   id: string;
   label: string;
+  /** Sprite file or "tabler:name"; picked automatically when omitted. */
+  icon?: string;
   help?: string;
   /** EXPORTSTATS key used by "Fill from EXPORTSTATS"; can depend on other inputs. */
   stat?: string | ((v: Values) => string | undefined);
@@ -42,6 +44,7 @@ export type Field = NumberField | BoolField | SelectField;
 
 export interface Section {
   title: string;
+  icon?: string;
   note?: string;
   fields: Field[];
   collapsed?: boolean;
@@ -51,6 +54,7 @@ export type Tone = 'primary' | 'good' | 'bad' | 'muted';
 
 export interface Output {
   label: string;
+  icon?: string;
   value: string;
   tone?: Tone;
   help?: string;

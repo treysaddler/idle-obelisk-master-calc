@@ -4,6 +4,7 @@ import { formatBig, parseNumber } from '../lib/format';
 import { load, remove, save } from '../lib/storage';
 import type { CalculatorDef, Field, NumberField, Result, Section, Values } from '../lib/types';
 import { useExportStats } from './hooks';
+import { iconForField, iconForText } from './autoIcons';
 import { Icon } from './Icon';
 
 function resolveSections(def: CalculatorDef, v: Values): Section[] {
@@ -67,7 +68,7 @@ function numberText(f: NumberField, value: number) {
   return String(Math.round(value * 1e8) / 1e8);
 }
 
-function NumberInput({ f, value, onChange }: { f: NumberField; value: number; onChange: (n: number) => void }) {
+function NumberInput({ f, value, onChange, icon }: { f: NumberField; value: number; onChange: (n: number) => void; icon?: string }) {
   const [text, setText] = useState(() => numberText(f, value));
   // Sync when the value changes from outside (reset, EXPORTSTATS fill).
   useEffect(() => {
@@ -90,7 +91,7 @@ function NumberInput({ f, value, onChange }: { f: NumberField; value: number; on
             : undefined;
   return (
     <div class={`field${invalid || overMax || underMin ? ' warn' : ''}`}>
-      <label for={`f-${f.id}`}>{f.label}</label>
+      <label for={`f-${f.id}`} class="field-label"><Icon file={icon} size={18} />{f.label}</label>
       <div class="input-wrap">
         <input
           id={`f-${f.id}`}
@@ -115,14 +116,15 @@ function NumberInput({ f, value, onChange }: { f: NumberField; value: number; on
 }
 
 function FieldInput({ f, values, set }: { f: Field; values: Values; set: (id: string, v: Values[string]) => void }) {
-  if (f.kind === 'number') return <NumberInput f={f} value={Number(values[f.id])} onChange={(n) => set(f.id, n)} />;
+  const icon = iconForField(f, values);
+  if (f.kind === 'number') return <NumberInput f={f} value={Number(values[f.id])} onChange={(n) => set(f.id, n)} icon={icon} />;
   if (f.kind === 'bool') {
     return (
       <div class="field toggle-field">
         <label class="toggle">
           <input type="checkbox" checked={values[f.id] === true} onChange={(e) => set(f.id, (e.target as HTMLInputElement).checked)} />
           <span class="track" aria-hidden="true" />
-          <span>{f.label}</span>
+          <span class="field-label"><Icon file={icon} size={18} />{f.label}</span>
         </label>
         {f.help && <small class="hint">{f.help}</small>}
       </div>
@@ -130,7 +132,7 @@ function FieldInput({ f, values, set }: { f: Field; values: Values; set: (id: st
   }
   return (
     <div class="field">
-      <label for={`f-${f.id}`}>{f.label}</label>
+      <label for={`f-${f.id}`} class="field-label"><Icon file={icon} size={18} />{f.label}</label>
       <select id={`f-${f.id}`} value={String(values[f.id])} onChange={(e) => set(f.id, (e.target as HTMLSelectElement).value)}>
         {f.options.map((o) => <option value={o.value} key={o.value}>{o.label}</option>)}
       </select>
@@ -145,7 +147,7 @@ function Results({ result }: { result: Result }) {
       <div class="outputs">
         {result.outputs.map((o) => (
           <div class={`output ${o.tone ?? ''}`} key={o.label}>
-            <span class="output-label">{o.label}</span>
+            <span class="output-label"><Icon file={o.icon ?? iconForText(o.label)} size={16} />{o.label}</span>
             <span class="output-value">{o.value}</span>
             {o.help && <small class="hint">{o.help}</small>}
           </div>
@@ -153,7 +155,7 @@ function Results({ result }: { result: Result }) {
       </div>
       {result.tables?.map((t) => (
         <details class="card table-card" open key={t.title}>
-          <summary>{t.title}</summary>
+          <summary><span class="summary-title"><Icon file={iconForText(t.title)} size={20} />{t.title}</span></summary>
           {t.note && <p class="muted">{t.note}</p>}
           <div class="table-scroll">
             <table>
@@ -265,7 +267,7 @@ export function CalculatorPage({ def }: { def: CalculatorDef }) {
             <form class="calc-form" key={resetKey} onSubmit={(e) => e.preventDefault()}>
               {sections.map((s, i) => (
                 <details class="card section" open={!s.collapsed || i === 0} key={s.title}>
-                  <summary>{s.title}</summary>
+                  <summary><span class="summary-title"><Icon file={s.icon ?? iconForText(s.title)} size={22} />{s.title}</span></summary>
                   {s.note && <p class="muted">{s.note}</p>}
                   <div class="fields">
                     {s.fields.map((f) => <FieldInput f={f} values={values} set={set} key={f.id} />)}

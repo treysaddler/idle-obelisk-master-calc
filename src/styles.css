@@ -320,3 +320,9 @@ tr.hl td { background: color-mix(in srgb, var(--accent) 18%, transparent); }
 .check input:checked + span { color: var(--muted); text-decoration: line-through; }
 
 .footer { max-width: 1100px; margin: 0 auto; padding: 0 var(--gutter) 32px; color: var(--muted); font-size: 0.82rem; }
+
+/* Small icons beside labels, section titles and results. */
+.field-label, .summary-title, .output-label { display: inline-flex; align-items: center; gap: 6px; }
+.field-label .icon, .summary-title .icon, .output-label .icon { flex: none; }
+.icon-ui { color: var(--muted); fill: none; stroke: currentColor; }
+.output.primary .output-label .icon-ui { color: var(--accent); }

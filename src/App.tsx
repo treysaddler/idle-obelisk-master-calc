@@ -113,7 +113,8 @@ export function App() {
           Community tool, not affiliated with Checkbox Team. Every calculator credits and links its original author. Source list:{' '}
           <a href="https://shminer.miraheze.org/wiki/External_Resources" target="_blank" rel="noopener noreferrer">wiki External Resources</a>.
           {' '}Game icons are Idle Obelisk Miner art by Checkbox Team, via the{' '}
-          <a href="https://shminer.miraheze.org/" target="_blank" rel="noopener noreferrer">Idle Obelisk Miner Wiki</a>.
+          <a href="https://shminer.miraheze.org/" target="_blank" rel="noopener noreferrer">Idle Obelisk Miner Wiki</a>;
+          interface icons are <a href="https://tabler.io/icons" target="_blank" rel="noopener noreferrer">Tabler Icons</a> (MIT).
         </p>
       </footer>
     </>
