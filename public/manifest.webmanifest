@@ -1,0 +1,16 @@
+{
+  "name": "Obelisk Calc — Idle Obelisk Miner calculators",
+  "short_name": "Obelisk Calc",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#16131f",
+  "theme_color": "#16131f",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
