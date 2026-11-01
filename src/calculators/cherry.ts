@@ -59,6 +59,7 @@ export function cherryVsD20(i: { freeBombChance: number; d20Charges: number; tri
 
 export const cherryCalc: CalculatorDef = {
   id: 'cherry-vs-d20',
+  icon: 'cherry-bomb.png',
   title: 'Cherry: Gem vs D20',
   category: 'Decisions',
   summary: 'Should your cherry charges go into Gem Bomb or D20 Bomb?',

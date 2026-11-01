@@ -80,6 +80,8 @@ export interface Source {
 
 export interface CalculatorDef {
   id: string;
+  /** File in public/icons (sprites from the wiki). */
+  icon?: string;
   title: string;
   category: Category;
   summary: string;
@@ -93,6 +95,7 @@ export interface CalculatorDef {
 
 export interface ExternalTool {
   id: string;
+  icon?: string;
   title: string;
   category: Category | 'Simulators';
   summary: string;

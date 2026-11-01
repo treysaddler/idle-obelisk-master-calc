@@ -4,6 +4,7 @@ import { formatBig, parseNumber } from '../lib/format';
 import { load, remove, save } from '../lib/storage';
 import type { CalculatorDef, Field, NumberField, Result, Section, Values } from '../lib/types';
 import { useExportStats } from './hooks';
+import { Icon } from './Icon';
 
 function resolveSections(def: CalculatorDef, v: Values): Section[] {
   return typeof def.sections === 'function' ? def.sections(v) : def.sections;
@@ -215,7 +216,7 @@ export function CalculatorPage({ def }: { def: CalculatorDef }) {
     <div class="calc-page">
       <header class="calc-head">
         <a href="#/" class="back">‹ All calculators</a>
-        <h1>{def.title}</h1>
+        <h1 class="title-with-icon"><Icon file={def.icon} size={36} />{def.title}</h1>
         <p class="muted">{def.summary}</p>
         <p class="credit">
           Ported from <a href={def.source.url} target="_blank" rel="noopener noreferrer">{def.source.name}</a>

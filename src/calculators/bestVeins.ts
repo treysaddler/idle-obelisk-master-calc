@@ -90,6 +90,7 @@ const WORLD_LAST_FLOOR = [42, 72, 102, 132];
 
 export const bestVeinsCalc: CalculatorDef = {
   id: 'best-vein-floor',
+  icon: 'stone-vein.png',
   title: 'Best Floor for Veins',
   category: 'Decisions',
   summary: 'Which floor gives the most of a vein per hour, with and without the void drone.',

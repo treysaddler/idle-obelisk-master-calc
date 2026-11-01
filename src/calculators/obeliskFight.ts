@@ -96,6 +96,7 @@ export function whatIfStats(v: Values): PickStats {
 
 export const obeliskFightCalc: CalculatorDef = {
   id: 'obelisk-fight',
+  icon: 'obelisk-base-icon.png',
   title: 'Obelisk Fight',
   category: 'Decisions',
   summary: 'How many attacks and how long it takes to beat your current obelisk, plus a what-if for contract and Minotaur upgrades.',

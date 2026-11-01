@@ -128,6 +128,15 @@ main {
 .tile:hover, .tile:focus-visible { border-color: var(--accent); }
 .tile:active { transform: scale(0.99); }
 .tile span { color: var(--muted); font-size: 0.92rem; }
+.tile { flex-direction: row; align-items: flex-start; gap: 12px; }
+.tile-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.tile > .icon { flex: none; margin-top: 2px; }
+
+/* Game sprites are pixel art: keep them crisp and inside their box. */
+.icon { image-rendering: pixelated; object-fit: contain; }
+.cat { display: flex; align-items: center; gap: 8px; }
+.title-with-icon { display: flex; align-items: center; gap: 10px; }
+.title-with-icon .icon { flex: none; }
 .tile small { color: var(--muted); font-size: 0.8rem; opacity: 0.8; }
 .tile.external { background: transparent; border-style: dashed; }
 

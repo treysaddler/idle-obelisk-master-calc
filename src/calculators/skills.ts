@@ -45,6 +45,7 @@ function ownedOptions(v: Values) {
 
 export const skillPointCalc: CalculatorDef = {
   id: 'skill-points',
+  icon: 'skill-point.png',
   title: 'Skill Points',
   category: 'Costs & Gains',
   summary: 'Gems or freebies needed to reach a skill from the closest one you own.',

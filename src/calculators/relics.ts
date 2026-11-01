@@ -65,6 +65,7 @@ export function relicTotals(relicChests: number, mythicChests: number, divineChe
 
 export const relicCalc: CalculatorDef = {
   id: 'relics',
+  icon: 'divine-chest.png',
   title: 'Relic Expectations',
   category: 'Odds',
   summary: 'Expected relics of every type from your chests, plus divine reroll odds and gem costs.',

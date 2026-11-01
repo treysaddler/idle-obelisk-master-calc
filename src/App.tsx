@@ -2,6 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { byId, calculators, CATEGORY_ORDER } from './calculators';
 import { externalTools } from './calculators/external';
 import { CalculatorPage } from './components/CalculatorPage';
+import { CATEGORY_ICONS, Icon } from './components/Icon';
 import { useExportStats, useHashRoute } from './components/hooks';
 import { StatsPage } from './components/StatsPage';
 import { setNotation, type Notation } from './lib/format';
@@ -31,12 +32,15 @@ function Home() {
         if (!list.length) return null;
         return (
           <section key={cat}>
-            <h2 class="cat">{cat}</h2>
+            <h2 class="cat"><Icon file={CATEGORY_ICONS[cat]} size={20} />{cat}</h2>
             <div class="tiles">
               {list.map((c) => (
                 <a class="tile" href={`#/c/${c.id}`} key={c.id}>
-                  <strong>{c.title}</strong>
-                  <span>{c.summary}</span>
+                  <Icon file={c.icon} />
+                  <div class="tile-text">
+                    <strong>{c.title}</strong>
+                    <span>{c.summary}</span>
+                  </div>
                 </a>
               ))}
             </div>
@@ -51,9 +55,12 @@ function Home() {
           <div class="tiles">
             {ext.map((t) => (
               <a class="tile external" href={t.source.url} target="_blank" rel="noopener noreferrer" key={t.id}>
-                <strong>{t.title} ↗</strong>
-                <span>{t.summary}</span>
-                <small>{t.status}</small>
+                <Icon file={t.icon} />
+                <div class="tile-text">
+                  <strong>{t.title} ↗</strong>
+                  <span>{t.summary}</span>
+                  <small>{t.status}</small>
+                </div>
               </a>
             ))}
           </div>
@@ -105,6 +112,8 @@ export function App() {
         <p>
           Community tool, not affiliated with Checkbox Team. Every calculator credits and links its original author. Source list:{' '}
           <a href="https://shminer.miraheze.org/wiki/External_Resources" target="_blank" rel="noopener noreferrer">wiki External Resources</a>.
+          {' '}Game icons are Idle Obelisk Miner art by Checkbox Team, via the{' '}
+          <a href="https://shminer.miraheze.org/" target="_blank" rel="noopener noreferrer">Idle Obelisk Miner Wiki</a>.
         </p>
       </footer>
     </>

@@ -120,6 +120,7 @@ export function damageAfterContracts(v: Values, extraContracts: number) {
 
 export const contractCalc: CalculatorDef = {
   id: 'contracts',
+  icon: 'contracts-icon.png',
   title: 'Contracts & Damage',
   category: 'Decisions',
   summary: 'How lucky your contract points were, what your upgrade goals cost, and how much damage more contracts add.',

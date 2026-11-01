@@ -9,6 +9,9 @@ mobile-friendly web app. Each calculator credits and links its original author.
   "Fill from EXPORTSTATS" button read it from there.
 - Number fields accept game notation (`1.5sxdc`, `326oc`) or scientific (`3.2e45`).
 
+Game icons in `public/icons/` are Idle Obelisk Miner art by Checkbox Team, taken from the
+[Idle Obelisk Miner Wiki](https://shminer.miraheze.org/) and credited in the app footer.
+
 ## Develop
 
 ```bash

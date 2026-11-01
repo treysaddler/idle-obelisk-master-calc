@@ -15,8 +15,9 @@ describe('lootbug engine', () => {
     // Free table without telescope: weights 30+35+5+20+15+15+20+16 = 156.
     expect(r.pure.loot.itemChests).toBeCloseTo(6 * (35 / 156), 10);
     expect(r.pure.loot.gems).toBeCloseTo(6 * (30 / 156) * 2, 10);
-    // Buff minutes are game time; the sheet divides by game speed.
-    expect(r.pure.loot.oreMinutes).toBeCloseTo((6 * (15 / 156) * 4) / 2, 10);
+    // Buff minutes are game time; the sheet divides by game speed. 2x speed counts double.
+    expect(r.pure.loot.oreMinutes).toBeCloseTo((6 * (15 / 156) * 2) / 2, 10);
+    expect(r.pure.loot.speedMinutes).toBeCloseTo((6 * (15 / 156) * 4) / 2, 10);
     expect(r.bankFullMinutes).toBe(100);
   });
 
@@ -29,6 +30,21 @@ describe('lootbug engine', () => {
     expect(r.pure.loot.itemChests).toBeCloseTo(6 * (35 / 156) + (paidItemBugs + goldItemBugs) * 3, 10);
     // Unbought buffs from paid bugs don't count; golden ones do.
     expect(r.pure.loot.relicChests).toBeCloseTo(6 * (5 / 156) + 6 * 0.25 * (10 / 114), 10);
+  });
+
+  it('scales paid timed buffs by the useful-uptime factor', () => {
+    const full = lootbugs({ ...base, buys: { ore: true } });
+    const half = lootbugs({ ...base, buys: { ore: 0.5 } });
+    expect(half.pure.gemsSpent).toBeCloseTo(full.pure.gemsSpent / 2, 10);
+    const free = lootbugs(base).pure.loot.oreMinutes;
+    expect(half.pure.loot.oreMinutes - free).toBeCloseTo((full.pure.loot.oreMinutes - free) / 2, 10);
+  });
+
+  it('uses the sheet\'s Bear table weights', () => {
+    const r = lootbugs({ ...base, goldenChance: 1, bear: { fueled: true, grade: 0, fuelGemsPerHour: 0 } });
+    // Bear gem table at ob 40: 14+10+24+8+24+20+10+10 = 120; regular: 114.
+    expect(r.bear.loot.bombMinutes).toBeCloseTo((6 * 0.3 * (8 / 120) * 2) / 2, 10);
+    expect(r.pure.loot.bombMinutes).toBeCloseTo((6 * (3 / 114) * 2) / 2, 10);
   });
 
   it('applies triple spawns, unlock gates, and the bear drone', () => {

@@ -57,6 +57,7 @@ function Checklist() {
 
 export const w3ChecklistCalc: CalculatorDef = {
   id: 'w3-checklist',
+  icon: 'world-3-monument.png',
   title: 'Late World 3 Checklist',
   category: 'Progression',
   summary: 'Step-by-step late World 3 progression and World 4 prep, with saved checkmarks.',

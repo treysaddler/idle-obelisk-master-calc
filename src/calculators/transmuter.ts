@@ -54,6 +54,7 @@ const pct = (id: string, label: string, stat: string, def = 0) =>
 
 export const transmuterCalc: CalculatorDef = {
   id: 'transmuter-vs-bop',
+  icon: 'transmuter-bomb.png',
   title: 'Transmuter vs Bomb of Plenty',
   category: 'Decisions',
   summary: 'Which ores to use Transmuter on, and which to Bomb of Plenty, based on your multipliers.',

@@ -46,6 +46,7 @@ export function froggerRates(i: FroggerInputs, grades = 46) {
 
 export const froggerCalc: CalculatorDef = {
   id: 'frogger-gems',
+  icon: 'drone-frogger.png',
   title: 'Frogger Gem Rate',
   category: 'Gems',
   summary: 'Net gems per hour from fuelling the Frogger drone suit at each grade.',

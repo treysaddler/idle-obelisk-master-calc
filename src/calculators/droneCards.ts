@@ -20,6 +20,7 @@ export const expectedTime = (p: number, ticksPerSecond: number) => 1 / p / ticks
 
 export const droneCardsCalc: CalculatorDef = {
   id: 'drone-cards',
+  icon: 'cardicon.png',
   title: 'Drone Cards & Shards',
   category: 'Odds',
   summary: 'Odds and time to get drone cards, polychrome shards and infernal shards.',

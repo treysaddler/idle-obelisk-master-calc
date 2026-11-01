@@ -35,6 +35,7 @@ export function droneGrade(i: {
 
 const droneGradeCalc: CalculatorDef = {
   id: 'drone-grade',
+  icon: 'fuel.png',
   title: 'Drone Suit Grade',
   category: 'Wiki Calculators',
   summary: 'Experience, time, fuel and gems needed to reach a drone suit grade.',
@@ -87,6 +88,7 @@ export function dronePointsGold(points: number, cost: number) {
 
 const dronePointsCalc: CalculatorDef = {
   id: 'drone-points',
+  icon: 'drone-bear-icon.png',
   title: 'Drone Points',
   category: 'Wiki Calculators',
   summary: 'Gold needed to buy a number of drone points.',
@@ -111,6 +113,7 @@ export const levelExp = (level: number) => Math.round((1.2 ** (level - 1) - 1) *
 
 const levelExpCalc: CalculatorDef = {
   id: 'level-exp',
+  icon: 'xp-level-cap.png',
   title: 'Level Experience',
   category: 'Wiki Calculators',
   summary: 'Total experience needed to reach a level.',
@@ -139,6 +142,7 @@ export function lootbugGems(i: { gems: number; cooldown: number; lootMulti: numb
 
 const lootbugCalc: CalculatorDef = {
   id: 'lootbug-speed',
+  icon: 'lootbug-default.png',
   title: 'Lootbug Speed Buff',
   category: 'Wiki Calculators',
   summary: 'Extra gems from each 2x speed buff a lootbug gives you.',
@@ -176,6 +180,7 @@ export function prestigePoints(level: number, multi: number) {
 
 const prestigeCalc: CalculatorDef = {
   id: 'prestige-points',
+  icon: 'prestige-point.png',
   title: 'Prestige Points',
   category: 'Wiki Calculators',
   summary: 'Prestige points gained when prestiging at a level.',

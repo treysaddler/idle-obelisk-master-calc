@@ -202,6 +202,7 @@ export const VOID_SECTION: Section = {
 
 export const bestFloorCalc: CalculatorDef = {
   id: 'best-floor',
+  icon: 'tin-ore.png',
   title: 'Best Floor to Farm',
   category: 'Decisions',
   summary: 'Which floor gives the most of an ore per hour, with and without the void drone.',

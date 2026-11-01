@@ -201,6 +201,7 @@ const LABELS: Record<string, string> = {
 
 export const pickaxeCalc: CalculatorDef = {
   id: 'pickaxe-damage',
+  icon: 'pickaxe-damage.png',
   title: 'Pickaxe Damage',
   category: 'Costs & Gains',
   summary: 'Adds up every source of pickaxe damage so you can see what an upgrade is worth.',
